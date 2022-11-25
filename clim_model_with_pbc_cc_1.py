@@ -24,15 +24,15 @@ half = Constant(0.5)
 x,y = SpatialCoordinate(M)
 
 # dimensionless constants for atmosphere
-Ro_a = Constant(10) # Rossby number
-Re_a = Constant(100) # Reynolds number
-Pe_a = Constant(100) # Peclet number
+Ro_a = Constant(1) # Rossby number
+Re_a = Constant(10) # Reynolds number
+Pe_a = Constant(10) # Peclet number
 
 
 # dimensionless constants for ocean
 Ro_o = Constant(10) # Rossby number
 Re_o = Constant(100) # Reynolds number
-Pe_o = Constant(100) # Peclet number
+Pe_o = Constant(1000) # Peclet number
 
 
 bell = 0.5*(1+cos(math.pi*min_value(sqrt(pow(x-0.5, 2) + pow(y-0.5, 2))/0.25, 1.0)))
@@ -79,8 +79,8 @@ outfile.write(project(i_ua,V_1_out, name= "atm_velocity"),Ta_,project(i_uo,V_1_o
 
 t = Dt
 iter = 1
-end = 0.1
-freq = 1 # printing results after every freq solves
+end = 0.2
+freq = 5 # printing results after every freq solves
 t_step = freq*Dt  # printing time step
 
 current_time = time.strftime("%H:%M:%S", time.localtime())

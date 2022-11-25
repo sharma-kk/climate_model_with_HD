@@ -28,15 +28,15 @@ half = Constant(0.5)
 x,y = SpatialCoordinate(M)
 
 # dimensionless constants for atmosphere
-Ro_a = Constant(10) # Rossby number
-Re_a = Constant(100) # Reynolds number
-Pe_a = Constant(100) # Peclet number
+Ro_a = Constant(1) # Rossby number
+Re_a = Constant(10) # Reynolds number
+Pe_a = Constant(10) # Peclet number
 # C_a = Constant(C_a)
 
 # dimensionless constants for ocean
-Ro_o = Constant(10) # Rossby number
+Ro_o = Constant(1) # Rossby number
 Re_o = Constant(100) # Reynolds number
-Pe_o = Constant(100) # Peclet number
+Pe_o = Constant(1000) # Peclet number
 # B_o = Constant(B_o)
 
 bell = 0.5*(1+cos(math.pi*min_value(sqrt(pow(x-0.5, 2) + pow(y-0.5, 2))/0.25, 1.0)))
@@ -104,8 +104,8 @@ outfile.write(ua_, uo_, Ta_, To_, p_, ua_s)
 
 t = Dt
 iter = 1
-end = 0.1
-freq = 1 # printing results after every freq solves
+end = 0.2
+freq = 5 # printing results after every freq solves
 t_step = freq*Dt  # printing time step
 
 current_time = time.strftime("%H:%M:%S", time.localtime())
