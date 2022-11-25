@@ -74,7 +74,7 @@ p_.rename("Ocean_pressure")
 To_.rename("Ocean_temperature")
 Ta_.rename("Atm_temperature")
 
-outfile = File(./results/"clim_modeL_with_pbc_CC_1.pvd")
+outfile = File("./results/clim_modeL_with_pbc_CC_1.pvd")
 outfile.write(project(i_ua,V_1_out, name= "atm_velocity"),Ta_,project(i_uo,V_1_out, name= "ocean_velocity"),p_,To_)
 
 t = Dt
