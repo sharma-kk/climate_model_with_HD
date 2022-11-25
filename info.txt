@@ -1,0 +1,7 @@
+In this folder we have two code files. In the first file "Helm_decom_climate_model_with_bc.py", 
+we have written a code for incorporating Helmholtz decomposition into the climate model. In this file
+we also solve the model on normal boundary conditions. 
+The other file "clim_model_with_pbc_cc_1.py" is basically the same code we wrote earlier
+to simulate the climate model with periodic boundary condtions for complete coupling test case.
+We have made changes in this file so that we can compare the results and see if after the Helmholtz decomposition,
+we still get satisfactory results.
