@@ -1,34 +1,7 @@
-# Climate model
-
 import time
 from functions_barycentric_mesh import *
 
-U = 10 # characteristic velocity
-L = 10**6 # characteristic length
-f = 10**-5 # f = 2*omega*sin(phi) coriolis parameter. This corresponds to 5-10 degrees of latitude
-
-nu_a = 10**6 # kinematic viscosity of air at 25 degrees celcius is roughly equal to 10^-5
-D_a = 10**6 # diffusion coefficient of air is roughly equal to 10^-5
-# characteristic time = 10**5 (1 day)
-Molar_mass = 10**-2 # Average molar mass of air = 29*10^-3
-R = 10 # Gas constant = 8.314
-THETA = U*f*L*Molar_mass/R # Temperature is nondimensionalized using this values
-# typ_temp = 300 # Typical temperature value in Kelvin
-# dim_temp = typ_temp/THETA # Typical nondimensionalized temperature value
-Rossby = U/(f*L)
-Reynolds_a = (L*U)/nu_a
-Peclet_a = (L*U)/D_a
-
-nu_o = 10**5 # kinematic viscosity of ocean surface water at 25 degrees celcius is 10^-6
-D_o = 10**4 # diffusion coefficient of ocean surface water is roughly equal to 10^-7
-rho_o = 10**3 # ocean density
-P = f*rho_o*U*L # characteristic pressure = 10**2 (=f*rho*U*L)
-Reynolds_o = (L*U)/nu_o
-Peclet_o = (L*U)/D_o
-
-
 N = 50
-
 bmh = PeriodicUnitSquareBaryMeshHierarchy(N,0)
 M =  bmh[-1]
 
@@ -51,16 +24,17 @@ half = Constant(0.5)
 x,y = SpatialCoordinate(M)
 
 # dimensionless constants for atmosphere
-Ro_a = Constant(Rossby) # Rossby number
-Re_a = Constant(Reynolds_a) # Reynolds number
-Pe_a = Constant(Peclet_a) # Peclet number
+Ro_a = Constant(10) # Rossby number
+Re_a = Constant(100) # Reynolds number
+Pe_a = Constant(100) # Peclet number
+
 
 # dimensionless constants for ocean
-Ro_o = Constant(Rossby) # Rossby number
-Re_o = Constant(Reynolds_o) # Reynolds number
-Pe_o = Constant(Peclet_o) # Peclet number
+Ro_o = Constant(10) # Rossby number
+Re_o = Constant(100) # Reynolds number
+Pe_o = Constant(100) # Peclet number
 
-# cone = 1.0 - min_value(sqrt(pow(x-0.5, 2) + pow(y-0.5, 2))/0.15, 1.0)
+
 bell = 0.5*(1+cos(math.pi*min_value(sqrt(pow(x-0.5, 2) + pow(y-0.5, 2))/0.25, 1.0)))
 i_uo = project(as_vector([Constant(0),Constant(0)]), V_1)
 To_ = Function(V_2).interpolate(3000 + 50*bell)
@@ -100,53 +74,22 @@ p_.rename("Ocean_pressure")
 To_.rename("Ocean_temperature")
 Ta_.rename("Atm_temperature")
 
-outfile = File("CC_1.pvd")
+outfile = File(./results/"clim_modeL_with_pbc_CC_1.pvd")
 outfile.write(project(i_ua,V_1_out, name= "atm_velocity"),Ta_,project(i_uo,V_1_out, name= "ocean_velocity"),p_,To_)
 
 t = Dt
 iter = 1
-end = 0.2
-freq = 5 # printing results after every freq solves
+end = 0.1
+freq = 1 # printing results after every freq solves
 t_step = freq*Dt  # printing time step
 
-#---------------------------------#
-lines = ["CLIMATE MODEL (Equations are non-dimensionalized with respect to atmosphere characteristic values) \n",
-        "Characteristic length (in meters), L = "+ str(L) + "\n", "Characteristic time (in seconds) = "+ str(L/U) + "\n",
-        "Characteristic velocity (in meters/second), U = "+ str(U) + "\n","Characteristic pressure (in Pascals), P = "+ str(P) + "\n",
-        "Characteristic temperature (in Kelvin) = "+ str(THETA) + "\n","Coriolis parameter, f = "+ str(f) + "\n",
-        "Kinematic viscosity of air (assumption) = "+str(nu_a)+"\n", "Thermal difffusivity of air (assumption) = "+str(D_a)+"\n",
-        "Kinematic viscosity of ocean (assumption) = "+str(nu_o)+"\n", "Thermal difffusivity of ocean (assumption) = "+str(D_o)+"\n",
-        "Coupling coefficients, sigma = "+str(-1.0)+", gamma = "+str(-1.0)+"\n",
-        "Rossby number = "+str(format(Rossby,"1.1e")) + "\n",
-        "Reynolds number (atmosphere) = "+ str(format(Reynolds_a,"1.1e")) + "\n",
-        "Peclet number (atmosphere) = "+str(format(Peclet_a,"1.1e")) + "\n",
-        "Reynolds number (ocean) = "+ str(format(Reynolds_o,"1.1e")) + "\n",
-        "Peclet number (ocean) = "+str(format(Peclet_o,"1.1e")) + "\n",
-        "Domain: 1x1 \n", "Mesh element size: " + str(1/N) + "\n",
-        "Time step: "+ str(Dt)+ "\n", "End time: "+str(end)+"\n",
-        "Initial ocean velocity: [Constant(0),Constant(0)] \n",
-        "Initial ocean temperature: 3000 + 50*bell \n",
-        "Initial atmospheric velocity: [Constant(0), Constant(0)] \n",
-        "Initial atmospheric temperature: Constant(3000) \n",
-        "Printing results at every "+str(t_step)+" time steps (we call it t_step)"+ "\n"]
-with open('CC_1.txt','w') as file:
-    file.writelines(lines)
-#---------------------------------#
 current_time = time.strftime("%H:%M:%S", time.localtime())
 print("Local time at the start of simulation:",current_time)
 start_time = time.time()
 
-div_ua_at_t_0 = sqrt(assemble(((div(ua_))**2)*dx))
-print("Divergence_check_atmosphere, L-2_norm_of_div(ua)_at_t=0:", div_ua_at_t_0)
-div_uo_at_t_0 = sqrt(assemble(((div(uo_))**2)*dx))
-print("Divergence_check_ocean, L-2_norm_of_div(uo)_at_t=0:", div_uo_at_t_0)
-with open('CC_1.txt','a') as file:
-    file.write("L-2 norm of atm velocity at t=0: "+str(div_ua_at_t_0)+"\n")
-    file.write("L-2 norm of ocean velocity at t=0: "+str(div_uo_at_t_0)+"\n")
-
 while (round(t,4)<=end):
 
-    solve(F==0, w)
+    solve(F==0, w, nullspace= nullspace)
 
     ua,Ta,uo,p,To= w.split()
 
@@ -158,18 +101,7 @@ while (round(t,4)<=end):
             total_execution_time = (end/t_step)*execution_time
             print("Approx. total running time: %.2f minutes:" %total_execution_time)
             print("Approx total running time: %.2f hours:"%(total_execution_time/60))
-            with open('CC_1.txt','a') as file:
-                file.write("Approx. running time for one t_step (in minutes): "+str(round(execution_time,2))+"\n")
-                # file.write("Approx. total running time (in minutes): "+str(round(total_execution_time,2))+"\n")
-                # file.write("Approx. total running time (in hours): "+str(round(total_execution_time/60,2))+"\n")
         print("t=", round(t,4))
-        div_ua_at_t = sqrt(assemble(((div(ua))**2)*dx))
-        print("Divergence_check_atmosphere, L-2_norm_of_div(ua)_at_this_time:", div_ua_at_t)
-        div_uo_at_t = sqrt(assemble(((div(uo))**2)*dx))
-        print("Divergence_check_ocean, L-2_norm_of_div(uo)_at_this_time:", div_uo_at_t)
-        with open('CC_1.txt','a') as file:
-            file.write("L-2 norm of atm velocity at t= "+str(round(t,4))+" is "+str(div_ua_at_t)+"\n")
-            file.write("L-2 norm of ocean velocity at t= "+str(round(t,4))+" is "+str(div_uo_at_t)+"\n")
         p.rename("Ocean_pressure")
         To.rename("Ocean_temperature")
         Ta.rename("Atm_temperature")
@@ -179,9 +111,7 @@ while (round(t,4)<=end):
     Ta_.assign(Ta)
     uo_.assign(uo)
     To_.assign(To)
-    # ua_avg = project(as_vector([assemble(ua[0]*dx),assemble(ua[1]*dx)]), V_1)
 
     t += Dt
     iter +=1
 
-# the solution diverges after t=0.11. Maybe mesh needs to be more refined.
