@@ -116,7 +116,7 @@ Ta_.rename("atm_temperature")
 ua_.rename("atm_velocity")
 uo_.rename("ocean_velocity")
 
-outfile = File("./results/test_case_2.pvd")
+outfile = File("./results/test_case_3.pvd")
 outfile.write(ua_, uo_, Ta_, To_, p_, ua_s)
 
 t = Dt
