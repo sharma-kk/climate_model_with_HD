@@ -1,4 +1,4 @@
-# climate_model_with_HD
+# climate_model_with_Helmholtz_decomposition
 
 We have two code files in the repository. In the first file "Helm_decom_climate_model_with_bc.py", 
 we have written a code for incorporating Helmholtz decomposition into the climate mode i.e. we calculate the divergence-free and curl-free parts of atmospheric 
