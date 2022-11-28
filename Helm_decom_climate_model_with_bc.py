@@ -1,4 +1,5 @@
 import time
+import math
 from functions_barycentric_mesh import *
 N = 50
 mesh = UnitSquareMesh(N,N)
@@ -39,15 +40,33 @@ Re_o = Constant(100) # Reynolds number
 Pe_o = Constant(1000) # Peclet number
 # B_o = Constant(B_o)
 
+#########################specifying initial conditions
+
+###########initial conditions for test case 2: complete coupling
+
+# bell = 0.5*(1+cos(math.pi*min_value(sqrt(pow(x-0.5, 2) + pow(y-0.5, 2))/0.25, 1.0)))
+# i_uo = project(as_vector([Constant(0),Constant(0)]), V_1)
+# To_ = Function(V_2).interpolate(3000 + 50*bell)
+# p_= Function(V_3).interpolate(Constant(0))
+
+# i_ua = project(as_vector([Constant(0),Constant(0)]), V_1)
+# Ta_ = Function(V_2).interpolate(Constant(3000))
+
+##############
+
+############initial conditions for test case 1: wind blowing over the ocean (cyclone kind of)
+
 bell = 0.5*(1+cos(math.pi*min_value(sqrt(pow(x-0.5, 2) + pow(y-0.5, 2))/0.25, 1.0)))
+circ = conditional(sqrt(pow(x-0.5, 2) +pow(y-0.5,2)) < 0.25, 1.0, 0.0)
+sq = conditional(And(And(x> 0.25, x < 0.75), And(y > 0.25, y < 0.75)), 1.0, 0.0)
 i_uo = project(as_vector([Constant(0),Constant(0)]), V_1)
-To_ = Function(V_2).interpolate(3000 + 50*bell)
+To_ = Function(V_2).interpolate(Constant(3000))
 p_= Function(V_3).interpolate(Constant(0))
 
-# i_ua = project(as_vector([(sin(pi*y))**2, 0]), V_1)
-i_ua = project(as_vector([Constant(0),Constant(0)]), V_1)
+i_ua = project(as_vector([sq,0]), V_1)
 Ta_ = Function(V_2).interpolate(Constant(3000))
 
+#############################
 gamma = -Constant(1.0)
 sigma = -Constant(1.0)
 ua_.assign(i_ua)
@@ -99,7 +118,7 @@ Ta_.rename("atm_temperature")
 ua_.rename("atm_velocity")
 uo_.rename("ocean_velocity")
 
-outfile = File("./results/cm_w_bc_hhd_1.pvd")
+outfile = File("./results/test_case_2.pvd")
 outfile.write(ua_, uo_, Ta_, To_, p_, ua_s)
 
 t = Dt
