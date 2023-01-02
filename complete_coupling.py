@@ -1,3 +1,6 @@
+import os
+os.environ["OMP_NUM_THREADS"] = "1"
+os.environ["OMPI_MCA_btl_openib_warn_no_device_params_found"] = "0"
 import time
 import math
 from functions_barycentric_mesh import *
@@ -33,7 +36,7 @@ x,y = SpatialCoordinate(M)
 Ro_a = Constant(1) # Rossby number
 Re_a = Constant(10) # Reynolds number
 Pe_a = Constant(10) # Peclet number
-# C_a = Constant(C_a)
+C_a = Constant(1/3000)
 
 # dimensionless constants for ocean
 Ro_o = Constant(1) # Rossby number
@@ -44,14 +47,14 @@ Pe_o = Constant(1000) # Peclet number
 #########################specifying initial conditions
 bell = 0.5*(1+cos(math.pi*min_value(sqrt(pow(x-0.5, 2) + pow(y-0.5, 2))/0.25, 1.0)))
 i_uo = project(as_vector([Constant(0),Constant(0)]), V_1)
-To_ = Function(V_2).interpolate(3000 + 50*bell)
+To_ = Function(V_2).interpolate(1 + (1/60)*bell)
 i_ua = project(as_vector([Constant(0),Constant(0)]), V_1)
-Ta_ = Function(V_2).interpolate(Constant(3000))
+Ta_ = Function(V_2).interpolate(Constant(1))
 p_= Function(V_3).interpolate(Constant(0))
 
 print("option 1: With Coriolis force \n")
 print("option 2: Without Coriolis force \n")
-opt = input("Pleace choose from the above options (type 1 or 2): ")
+opt = input("Please choose from the above options (type 1 or 2): ")
 
 gamma = -Constant(1.0)
 sigma = -Constant(1.0)
@@ -68,7 +71,7 @@ if opt=="1":
     F = ( inner(ua - ua_, va)
         + Dt*half*(inner(dot(ua, nabla_grad(ua)), va) + inner(dot(ua_, nabla_grad(ua_)), va))
         + Dt*half*(1/Ro_a)*(-(ua[1]+ua_[1])*va[0] +(ua[0]+ua_[0])*va[1]) 
-        + Dt*half*(1/Ro_a)*inner((grad(Ta)+grad(Ta_)),va)
+        + Dt*half*(1/C_a)*inner((grad(Ta)+grad(Ta_)),va)
         + Dt *half *(1/Re_a)*inner((nabla_grad(ua)+nabla_grad(ua_)), nabla_grad(va))
         + (Ta -Ta_)*phi_a + Dt*half*(inner(ua_,grad(Ta_)) + inner(ua,grad(Ta)))*phi_a
         - Dt*gamma*half*(Ta - To + Ta_ - To_)* phi_a
@@ -84,10 +87,10 @@ if opt=="1":
         + Dt*half*(1/Pe_o)*inner((grad(To)+grad(To_)),grad(phi_o))
         - inner(grad(q), grad(psi)) - div(ua)*psi)* dx
 elif opt=="2":
-    o_file = "comp_coup_w/o_Coriolis.pvd"
+    o_file = "comp_coup_with_out_Coriolis.pvd"
     F = ( inner(ua - ua_, va)
         + Dt*half*(inner(dot(ua, nabla_grad(ua)), va) + inner(dot(ua_, nabla_grad(ua_)), va))
-        + Dt*half*(1/Ro_a)*inner((grad(Ta)+grad(Ta_)),va)
+        + Dt*half*(1/C_a)*inner((grad(Ta)+grad(Ta_)),va)
         + Dt *half *(1/Re_a)*inner((nabla_grad(ua)+nabla_grad(ua_)), nabla_grad(va))
         + (Ta -Ta_)*phi_a + Dt*half*(inner(ua_,grad(Ta_)) + inner(ua,grad(Ta)))*phi_a
         - Dt*gamma*half*(Ta - To + Ta_ - To_)* phi_a
